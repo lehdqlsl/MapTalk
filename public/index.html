@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MapTalk</title>
+</head>
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<script>
+    var socket = io.connect('http://166.104.115.198:3000');
+
+
+    // 소켓 연결 완료 시 처리
+    socket.on('connect', function () {
+        socket.emit('sendchat', "누군가! 채팅 접속!");
+    });
+
+
+    // 서버에서 updatechat 이벤트 요청 시 처리
+    // 서버에서 온 채팅을 업데이트 함
+
+    socket.on('updatechat', function (data) {
+        $('#conversation').append(data + '<br>');
+    });
+
+
+    
+    // 페이지 로드 완료 시 처리
+    $(function () {
+        $('#conversation').append("채팅사이트에 오신걸 환영합니다!" + '<br>');
+
+        //datasend 버튼 클릭 시 이벤트 (서버로 메시지를 전송 함)
+        $('#datasend').click(function () {
+            var name = $('#name').val();
+            var message = $('#data').val();
+            $('#data').val('');
+
+            //서버로 message 전송
+            socket.emit('sendchat', name + " : " + message);
+        });
+
+        $('#data').keypress(function (e) {
+            if (e.which === 13) {
+                $(this).blur();
+                $('#datasend').focus().click();
+                $('#data').focus();
+            }
+        });
+    });
+
+</script>
+
+<div>
+    닉네임 : <input type="text" id="name" style="width: 100px;"/> <br>
+    <input type="text" id="data" onkeydown="keydown(event)" style="width:200px;"/>
+    <input type="button" id="datasend" value="전송"/>
+</div>
+
+<div id="conversation"></div>
+</body>
+</html>
